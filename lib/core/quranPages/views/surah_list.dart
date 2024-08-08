@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:quran/quran.dart';
+import 'package:quran_app/core/quranPages/views/quran_page.dart';
 import 'package:quran_app/models/surah.dart';
 
 class SurahList extends StatefulWidget {
@@ -11,14 +12,16 @@ class SurahList extends StatefulWidget {
   State<SurahList> createState() => _SurahListState();
 }
 
-
-
 class _SurahListState extends State<SurahList> {
 
-  List<Surah> surahList = [];
+  var surahList = [];
+  List<Surah> filteredSurahList = [];
   @override
   void initState() {
     // fetchSurahs();
+    setState(() {
+      surahList = widget.surahJsonData;
+    });
     super.initState();
   }
   
@@ -37,13 +40,42 @@ TextEditingController textEditingController = TextEditingController();
       appBar: AppBar(title: const Text("Quran Surah Page"),),
       body: Column(
         children: [
-          // TextField( //search text field
-          //   textDirection: TextDirection.rtl,
-          //   controller: textEditingController,
-          //   onChanged: (value) {},
-          //   style: const TextStyle(color: Color.fromARGB(190, 0, 0, 0)),
-          //   decoration: const InputDecoration(),
-          // ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child:TextField(
+              controller: textEditingController,
+              onChanged: (value) {
+                if (value == ""){
+                  setState(() {
+                    surahList = widget.surahJsonData;
+                  });
+                } else {
+                   setState(() {
+                    surahList = widget.surahJsonData.where((surah){
+                      final surahName = surah['englishName'].toLowerCase();
+                      final surahNameArabic = getSurahNameArabic(surah['number']);
+                      return surahName.contains(value.toLowerCase()) || surahNameArabic.contains(value.toLowerCase());
+                    }).toList();
+                     });
+                }
+
+              },
+              decoration: InputDecoration(
+              border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(20.0),
+              borderSide: BorderSide.none,
+              ),
+              filled: true,
+              fillColor: Colors.grey[200], // Light grey background
+              hintText: 'Seach surah',
+              hintStyle: TextStyle(color: Colors.grey[600]),
+              prefixIcon: Icon(Icons.search, color: Colors.grey[600]), // Optional icon
+              contentPadding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 15.0),
+        // Optionally, you can add a suffixIcon or a counter text
+              ),
+            ), 
+          ),
+        
 
          
           //Surah list
@@ -57,14 +89,14 @@ TextEditingController textEditingController = TextEditingController();
               color: Colors.grey.withOpacity(.5),
               ),
             ),
-            itemCount: widget.surahJsonData.length,
+            itemCount: surahList.length,
             itemBuilder: (context, index) {
               int id = index + 1;
-              String surahName = widget.surahJsonData[index]["englishName"];
-              String surahNameEnglishTranslated = widget.surahJsonData[index]["englishNameTranslation"];
-              int surahNumber = widget.surahJsonData[index]["number"];
-              int ayahCount = getVerseCount(id);
-
+              String surahName = surahList[index]["englishName"];
+              String surahNameArabic = surahList[index]["name"];
+              int surahNumber = surahList[index]["number"];
+              int ayahCount = getVerseCount(surahNumber);
+              String revelationType = surahList[index]["revelationType"];
               return Padding(
                 padding: const EdgeInsets.all(0.0),
                
@@ -101,14 +133,16 @@ TextEditingController textEditingController = TextEditingController();
                       ),
 
                       subtitle: Text(
-                        "$surahNameEnglishTranslated ($ayahCount)",
+                        "$revelationType - ($ayahCount) - $surahNameArabic",
                         style: TextStyle(
                           fontSize: 14,
                           color: Colors.grey.withOpacity(.8),
                           ),
                       ),
                       
-                      onTap: () async {},
+                      onTap: () async {
+                        Navigator.push(context, MaterialPageRoute(builder: (builder)=> QuranPage(pageNumber: getPageNumber(surahNumber, 1), surahJsonData: widget.surahJsonData,surahNumber: surahNumber) ));
+                      },
                     ),
 
                 );
