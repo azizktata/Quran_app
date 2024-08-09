@@ -33,12 +33,15 @@ dependencies:
   quran:
     path: ./quran-1.2.2
   wakelock: ^0.6.2
-  # geolocator:
-  # flutter_qiblah:
 
+  geolocator: # For obtaining the user's location
+  # smooth_compass: # For accessing the device's compass
+  # flutter_qiblah: # For Qiblah calculation
+  adhan: ^2.0.0+1
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
+  google_fonts:
 
 dev_dependencies:
   flutter_test:
@@ -103,7 +106,7 @@ flutter:
 
     - family: "qaloon"
       fonts:
-        - asset: assets/fonts/qaloon.ttf
+        - asset: assets/fonts/UthmanicQaloun V21.ttf
 
     - family: QCF_P001
       fonts:

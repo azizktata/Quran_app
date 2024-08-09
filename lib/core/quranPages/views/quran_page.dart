@@ -138,11 +138,12 @@ class _QuranPageState extends State<QuranPage> {
                               child: SizedBox(
 
                                 width: double.infinity,
+                                
                                 child: RichText(
 
                                   key: richTextKeys[index-1],
                                   textDirection: TextDirection.rtl,
-                                  textAlign: (index == 1 || index == 2 || index > 570) ? TextAlign.center : TextAlign.center,
+                                  textAlign: TextAlign.center,
                                   softWrap: true,
                                   locale: const Locale("ar"), 
                                   text: TextSpan(
@@ -155,23 +156,51 @@ class _QuranPageState extends State<QuranPage> {
                                       for (var i = e["start"]; i <= e["end"]; i++){
                                         
                                         if(i == 1){
-                                          // spans.add(WidgetSpan(
-                                          //   child: Text("${i}")
-                                          //   ));
+                                          spans.add(
+                                            
+                                            WidgetSpan(
+                                            child: SizedBox(
+                                              height: 50,
+                                              child: Stack(
+                                                children: [
+                                                  Center(
+                                                    child: Image.asset(
+                                                      "assets/images/888-02.png",
+                                                      width: MediaQuery.of(context).size.width,
+                                                      height: 50,
+                                                    ),
+                                                    
+                                                  ),
+                                                  Center(
+                                                    child: Text(
+                                                      "${widget.surahJsonData[e['surah']-1]['name']}",
+                                                      style: TextStyle(
+                                                        fontSize: 20
+                                                      ),
+                                                      ),
+                                                  )
+                                                ],
+                                              ),
+                                            )
+                                            
+                                           
+                                            ));
                                         
-                                        if (index != 187 && index != 1 ) {
-                                          spans.add(WidgetSpan(
-                                          child: Basmallah(),
+                                          if (index != 187 && index != 1 ) {
+                                            spans.add(WidgetSpan(
+                                            child: Basmallah(),
                                           ));
-                                        }
-                                        if (index == 187 ) {
-                                          spans.add(WidgetSpan(
-                                          child: Container(
-                                            height: 10,
-                                          ),
+                                          }
+                                          // Surah tawbah without Basmalah
+                                          if (index == 187 ) {
+                                            spans.add(WidgetSpan(
+                                            child: SizedBox(
+                                              height: 5,
+                                            ),
                                           ));
-                                        }                   
+                                          }                   
                                       }
+                                    
                                         
                                         // Verses
                                         spans.add(TextSpan(
@@ -181,15 +210,16 @@ class _QuranPageState extends State<QuranPage> {
                                       // quran.getVerseQCF(e["surah"], i, verseEndSymbol: true)
                                           style: TextStyle(
                                             color: Colors.black,
-                                            height: (index == 1 || index == 2) ? 2 : 1.85,
+                                            height: (index == 1 || index == 2) ? 2 : 1.80,
                                             letterSpacing: 0,
                                             wordSpacing: 0,
                                             fontFamily:
                                               "QCF_P${index.toString().padLeft(3, "0")}",
-                                            fontSize: index == 1 || index ==2 ? 28.5 : 24.4,
+                                            fontSize: index == 1 || index ==2 ? 28.5 : 24.3,
                                           )
                                         ));
                                       }
+                             
                                     return spans;
                                     }).toList()
                                   ),
@@ -198,9 +228,7 @@ class _QuranPageState extends State<QuranPage> {
                              ),
                           ),
 
-                          // const SizedBox(
-                          //   height: 15,
-                          // ),
+                     
                         ],
                       ),
                     )

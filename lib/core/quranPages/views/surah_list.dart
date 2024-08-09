@@ -1,24 +1,28 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:quran/quran.dart';
 import 'package:quran_app/core/quranPages/views/quran_page.dart';
 import 'package:quran_app/models/surah.dart';
 
 class SurahList extends StatefulWidget {
 
-  final surahJsonData; 
-  const SurahList({super.key, required this.surahJsonData});
+  var surahJsonData;
+   SurahList({super.key, required this.surahJsonData});
 
   @override
   State<SurahList> createState() => _SurahListState();
 }
 
 class _SurahListState extends State<SurahList> {
-
+  
   var surahList = [];
   List<Surah> filteredSurahList = [];
   @override
   void initState() {
     // fetchSurahs();
+   
     setState(() {
       surahList = widget.surahJsonData;
     });
@@ -103,8 +107,7 @@ TextEditingController textEditingController = TextEditingController();
                     child: ListTile(
                       leading: SizedBox(
                         width: 45,
-                        height: 45,
-                        
+                        height: 45,                        
                         child: Center(
                           child: Text(
                             surahNumber.toString(),
