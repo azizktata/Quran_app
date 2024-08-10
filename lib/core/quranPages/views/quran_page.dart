@@ -127,7 +127,7 @@ class _QuranPageState extends State<QuranPage> {
                             height: (screenSize.height * .15),
                           ),
                           const SizedBox(
-                            height: 8,
+                            height: 32,
                           ),
 
                           // Verses widget
@@ -210,7 +210,7 @@ class _QuranPageState extends State<QuranPage> {
                                       // quran.getVerseQCF(e["surah"], i, verseEndSymbol: true)
                                           style: TextStyle(
                                             color: Colors.black,
-                                            height: (index == 1 || index == 2) ? 2 : 1.80,
+                                            height: (index == 1 || index == 2) ? 2 : 1.88,
                                             letterSpacing: 0,
                                             wordSpacing: 0,
                                             fontFamily:

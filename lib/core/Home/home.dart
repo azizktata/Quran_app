@@ -1,9 +1,13 @@
 import 'dart:convert';
 
+import 'package:adhan/adhan.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:quran_app/constants.dart';
 import 'package:quran_app/core/Home/Components/BottomNavBar.dart';
-import 'package:quran_app/core/Home/prayerTimes.dart';
+import 'package:quran_app/core/Home/prayerTime.dart';
+import 'package:quran_app/core/Qiblah/Qiblah.dart';
 import 'package:quran_app/core/quranPages/views/surah_list.dart';
 import 'package:quran_app/enums.dart';
 
@@ -33,6 +37,8 @@ class _HomeScreenState extends State<HomeScreen> {
     });
  
    }
+
+   
     @override
   void initState() {
     loadJsonAsset();
@@ -46,37 +52,19 @@ class _HomeScreenState extends State<HomeScreen> {
       //   preferredSize: Size.fromHeight(AppBar().preferredSize.height),
       //   child: customBar(context),
       // ),
-      body: Container(
-        width: double.infinity,
+      body: SafeArea(
         child: Column(
           children: [
-            PrayerTimes()
+            PrayerTime()
           ],
-        )
-      ),
+          
+          )
+        ),
+    
+      
       bottomNavigationBar: BottomNavbar(
         selectedMenu: MenuState.home,
-        onMenuSelected: (MenuState menu) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) {
-                switch (menu) {
-                  case MenuState.home:
-                    return HomeScreen();
-                  case MenuState.quran:
-                    return SurahList(surahJsonData: surahJsonData,);
-                  // case MenuState.settings:
-                  //   return SettingsScreen();
-                  // case MenuState.qiblah:
-                  //   return QiblahScreen();
-                  default:
-                    return HomeScreen();
-                }
-              },
-            ),
-          );
-        },
+        surahJsonData: surahJsonData,
       ),
     );
   }

@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:quran_app/constants.dart';
 import 'package:quran_app/core/Home/Home.dart';
+import 'package:quran_app/core/Qiblah/Qiblah.dart';
 import 'package:quran_app/core/quranPages/views/surah_list.dart';
 import 'package:quran_app/enums.dart';
 
 class BottomNavbar extends StatelessWidget {
   final MenuState selectedMenu;
-  final Function(MenuState) onMenuSelected;
-  const BottomNavbar({super.key,required this.selectedMenu, required this.onMenuSelected});
+  var  surahJsonData;
+  // final Function(MenuState) onMenuSelected;
+
+   BottomNavbar({super.key,required this.selectedMenu, required this.surahJsonData});
 
   @override
   Widget build(BuildContext context) {
@@ -30,34 +33,49 @@ class BottomNavbar extends StatelessWidget {
       ),
       child: SafeArea(
         top: false,
-        child: BottomNavigationBar(
-          type: BottomNavigationBarType.fixed,
-          backgroundColor: Colors.white,
-          selectedItemColor: kPrimaryColor,
-          unselectedItemColor: inActiveIconColor,
-          currentIndex: MenuState.values.indexOf(selectedMenu),
-          onTap: (index) {
-            onMenuSelected(MenuState.values[index]);
-          },
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home),
-              label: 'Home',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.menu_book),
-              label: 'Quran',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.directions),
-              label: 'Qiblah',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.mosque_rounded),
-              label: 'Prayer Times',
-            ),
-          ],
-        ),
+            child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              IconButton(
+                icon: Icon(Icons.home,
+                  color: MenuState.home == selectedMenu
+                      ? kPrimaryColor
+                      : inActiveIconColor,
+                ),
+                onPressed: () =>
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => HomeScreen()))
+    
+              ),
+              IconButton(
+                icon: Icon(Icons.directions,
+                color: MenuState.qiblah == selectedMenu
+                      ? kPrimaryColor
+                      : inActiveIconColor,),
+                onPressed: () =>
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => Qiblah())),
+                
+              ),
+              IconButton(
+                icon: Icon(Icons.menu_book, 
+                color: MenuState.quran == selectedMenu
+                      ? kPrimaryColor
+                      : inActiveIconColor,),
+                onPressed: () =>
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => SurahList(surahJsonData: surahJsonData,))),
+
+              ),
+              // IconButton(
+              //   icon: SvgPicture.asset(
+              //     "assets/icons/User Icon.svg",
+              //     color: MenuState.profile == selectedMenu
+              //         ? kPrimaryColor
+              //         : inActiveIconColor,
+              //   ),
+              //   onPressed: () =>
+              //       Navigator.pushNamed(context, ProfileScreen.routeName),
+              // ),
+            ],
+          )
       ),
     );
   }
