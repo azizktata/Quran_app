@@ -1,9 +1,12 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'dart:typed_data';
+
 import 'package:adhan/adhan.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
-
+import 'package:audioplayers/audioplayers.dart';
 import 'package:quran_app/constants.dart';
 import 'package:intl/intl.dart';
 
@@ -54,12 +57,10 @@ class PrayerTime extends StatefulWidget {
   // continue accessing the position of the device.
      return await Geolocator.getCurrentPosition();
 }
-
-  late PrayerTimes todayPrayerTime;
-  //  Position? _currentPosition;
-  late Coordinates? myCoordinates;
  
- void _getCurrentLocation() async {
+PrayerTimes? todayPrayerTimes;
+
+ Future _getCurrentLocation() async {
 
     Position position = await _determinePosition();
 
@@ -67,101 +68,151 @@ class PrayerTime extends StatefulWidget {
     params.madhab = Madhab.shafi;
     params.adjustments.isha = 7;
     params.adjustments.isha = 7;
-    final date = DateComponents.from(DateTime.now());
-      // print(position.latitude);
-      // print(position.longitude);
-      final myCoordinates = Coordinates(position.latitude, position.longitude, validate: true);
-      if(myCoordinates!= null){
-        final prayerTimes =  PrayerTimes.today(myCoordinates!, params);
-        setState(() {
-          todayPrayerTime = prayerTimes;
-        }); 
-    }
-  }
-  String fajrTime="";
- @override
-  void initState()  {
 
-      _getCurrentLocation();
-    //  fajrTime = DateFormat('HH:mm').format(todayPrayerTime!.fajr.toLocal());
+    final myCoordinates = Coordinates(position.latitude, position.longitude, validate: true); 
+    final prayerTimes =  PrayerTimes.today(myCoordinates, params);
+    setState(() {
+      todayPrayerTimes = prayerTimes;
+    });
+
+    
+    
+    return prayerTimes;
     
   }
+
+PlayerState? _playerState;
+final player = AudioPlayer();
+bool get _isPlaying => _playerState == PlayerState.playing;
+
+Future playAudio() async {
+    // final date = DateComponents.from(DateTime.now());
+    // if(DateTime.now().hour == todayPrayerTimes?.timeForPrayer(todayPrayerTimes!.nextPrayer())?.hour)
+    await player.play(AssetSource('adhan/adhen-tounes-ali-barek.mp3'));
+}
+void handlePlayPause()  {
+    player.pause();
+}
+
+ @override
+  void initState()  {
+    // player.play('adhan/adhen-tounes-ali-barek.mp3');    
+   
+    //  if(DateTime.now().hour == 11 && DateTime.now().minute == 43)
+    //   {
+    //     playAudio();
+    //   }
+    // player.play(UrlSource('https://www.youtube.com/watch?v=y1emfKzsUqA'));
+    
+    
+    // player.setSourceUrl('adhan/adhen-tounes-ali-barek.mp3');
+  }
   // DateTime? fajreTime = todayPrayerTime?.fajr.toLocal();
+
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
-    return Container(
-      // width: screenSize.width,
-      child: Padding(
-        padding: const EdgeInsets.only(top:16.0, left: 16, right: 16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            //Next Prayer
-            const Padding(
-              padding: EdgeInsets.only(bottom: 8),
-              child: Text(
-                'Next prayer',
-                style: TextStyle(
-                  color: kSecondaryColor,
-                  fontSize: 16
+    return FutureBuilder(
+      future: _getCurrentLocation(),
+      builder: (BuildContext context, AsyncSnapshot snapshot){
+        return Container(
+          // width: screenSize.width,
+          
+          child: Padding(
+            padding: const EdgeInsets.only(top:16.0, left: 16, right: 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                //Next Prayer
+                const Padding(
+                  padding: EdgeInsets.only(bottom: 8),
+                  child: Text(
+                    'Next prayer',
+                    style: TextStyle(
+                      color: kSecondaryColor,
+                      fontSize: 16
+                    ),
+                    ),
+                  ),
+                
+               Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: Text(
+                    '05h:12min until ${snapshot.data?.nextPrayer()}',
+                    style: GoogleFonts.poppins(
+                      color: kTextColor,
+                      fontSize: 20,
+                    ),
+                    ),
+                  ),
+                // IconButton(
+                //     icon: Icon(Icons.build),
+                //    onPressed: () {
+                //      final player = AudioPlayer();
+                //      player.play(AssetSource('adhan/adhen-tounes-ali-barek.mp3'));
+                //    },
+                   
+                 
+                   
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Row(
+                        mainAxisSize: MainAxisSize.max,
+                        children: [
+                           Expanded(child: PrayerCard(prayerName: "Fajre", activePrayer: snapshot.data?.nextPrayer()==Prayer.fajr ? true : false, prayerTime: "${snapshot.data?.fajr.hour}:${snapshot.data?.fajr.minute} am", playAudio: () { playAudio(); },stopAudio: () { handlePlayPause(); })),
+                           Expanded(child: PrayerCard(prayerName: "sunrise", activePrayer: snapshot.data?.nextPrayer()==Prayer.sunrise ? true : false, prayerTime: "${snapshot.data?.sunrise.hour}:${snapshot.data?.sunrise.minute} am",playAudio: () { playAudio(); },stopAudio: () { handlePlayPause();}),),
+                           Expanded(child: PrayerCard(prayerName: "Dhuhr", activePrayer: snapshot.data?.nextPrayer()==Prayer.dhuhr ? true : false, prayerTime: "${snapshot.data?.dhuhr.hour}:${snapshot.data?.dhuhr.minute} pm",playAudio: () { playAudio(); },stopAudio: () { handlePlayPause();})),
+                        ],
+                  ),
                 ),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: Row(
+                        mainAxisSize: MainAxisSize.max,
+                        children: [
+                           Expanded(child: PrayerCard(prayerName: "Asre", activePrayer: snapshot.data?.nextPrayer()==Prayer.asr ? true : false, prayerTime: "${snapshot.data?.asr.hour}:${snapshot.data?.asr.minute} pm", playAudio: () { playAudio(); },stopAudio: () { handlePlayPause(); })),
+                           Expanded(child: PrayerCard(prayerName: "Maghrib", activePrayer: snapshot.data?.nextPrayer()==Prayer.maghrib ? true : false, prayerTime: "${snapshot.data?.maghrib.hour}:${snapshot.data?.maghrib.minute} pm", playAudio: () { playAudio(); },stopAudio: () { handlePlayPause(); })),
+                           Expanded(child: PrayerCard(prayerName: "Isha", activePrayer: snapshot.data?.nextPrayer()==Prayer.isha ? true : false, prayerTime: "${snapshot.data?.isha.hour}:${snapshot.data?.isha.minute} pm", playAudio: () { playAudio(); },stopAudio: () { handlePlayPause(); })),
+                        ],
+                  ),
                 ),
+                ],
               ),
-            
-           Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: Text(
-                '05;12 min until ${todayPrayerTime.nextPrayer()}',
-                style: GoogleFonts.poppins(
-                  color: kTextColor,
-                  fontSize: 20,
-                ),
-                ),
-              ),
-            
-            Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: Row(
-                    mainAxisSize: MainAxisSize.max,
-                    children: [
-                       Expanded(child: PrayerCard(prayerName: "Fajre", activePrayer: true, prayerTime: "${todayPrayerTime.fajr.hour}:${todayPrayerTime.fajr.minute} am")),
-                       Expanded(child: PrayerCard(prayerName: "Sunrise", activePrayer: false, prayerTime: "${todayPrayerTime.sunrise.hour}:${todayPrayerTime.sunrise.minute} am")),
-                       Expanded(child: PrayerCard(prayerName: "Dhuhr", activePrayer: false, prayerTime: "${todayPrayerTime.dhuhr.hour}:${todayPrayerTime.dhuhr.minute} pm")),
-                    ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: Row(
-                    mainAxisSize: MainAxisSize.max,
-                    children: [
-                       Expanded(child: PrayerCard(prayerName: "Asre", activePrayer: false, prayerTime: "${todayPrayerTime.asr.hour}:${todayPrayerTime.asr.minute} pm")),
-                       Expanded(child: PrayerCard(prayerName: "Maghrib", activePrayer: false, prayerTime: "${todayPrayerTime.maghrib.hour}:${todayPrayerTime.maghrib.minute} pm")),
-                       Expanded(child: PrayerCard(prayerName: "Isha", activePrayer: false, prayerTime: "${todayPrayerTime.isha.hour}:${todayPrayerTime.isha.minute} pm")),
-                    ],
-              ),
-            ),
-            ],
           ),
-      ),
+        );
+      }
     );
   }
  }
 
 
-class PrayerCard extends StatelessWidget {
+class PrayerCard extends StatefulWidget {
   String prayerName;
   bool activePrayer=false;
   var prayerTime;
+  final Function() playAudio;
+  final Function() stopAudio;
    PrayerCard({
     Key? key,
     required this.prayerName,
     required this.activePrayer,
-    required this.prayerTime
+    required this.prayerTime,
+    required this.playAudio,
+    required this.stopAudio
   }) : super(key: key);
 
+  @override
+  State<PrayerCard> createState() => _PrayerCardState();
+}
+
+class _PrayerCardState extends State<PrayerCard> {
   bool _isIconPressed = false;
+
+  void _toggleIcon() {
+    setState(() {
+      _isIconPressed = !_isIconPressed;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -180,7 +231,7 @@ Padding(
       width: 110,
       height: 92,
       decoration: 
-      activePrayer ? BoxDecoration(
+      widget.activePrayer ? BoxDecoration(
         color: kPrimaryColor,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
@@ -198,7 +249,7 @@ Padding(
       child: Align(
         alignment: AlignmentDirectional(0, 0),
         child: Padding(
-          padding: prayerName=="Maghrib" ? EdgeInsetsDirectional.fromSTEB(0, 0, 0, 0) : EdgeInsetsDirectional.fromSTEB(8, 0, 0, 0),
+          padding: widget.prayerName=="Maghrib" ? EdgeInsetsDirectional.fromSTEB(0, 0, 0, 0) : EdgeInsetsDirectional.fromSTEB(8, 0, 0, 0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.center,
@@ -206,27 +257,36 @@ Padding(
               Row(
                 children: [
                  Text(
-                      prayerName,
+                      widget.prayerName,
                       style: GoogleFonts.poppins(
                             
-                            color: activePrayer ? Colors.white : kSecondaryColor,
+                            color: widget.activePrayer ? Colors.white : kSecondaryColor,
                             fontSize: 15,
                             letterSpacing: 0,
                           ),
                     ),
                
                   IconButton(
-                  icon: Icon( _isIconPressed ? Icons.alarm : Icons.vibration),         
+                  icon: widget.prayerName!= "sunrise" ? Icon( _isIconPressed ? Icons.alarm : Icons.vibration) : Icon(Icons.vibration),         
                   onPressed: () {
                     
+                    if (widget.prayerName != "sunrise"){
+                      _toggleIcon();
+                      if( _isIconPressed)
+                      {
+                        widget.playAudio();
+                      }
+                      widget.stopAudio();
+                    }
+            
                   }
                 ),
                 ],
               ),
               Text(
-                  prayerTime,
+                  widget.prayerTime,
                   style:  GoogleFonts.poppins(
-                            color: activePrayer ? Colors.white : Colors.black,
+                            color: widget.activePrayer ? Colors.white : Colors.black,
                             fontSize: 15,
                             letterSpacing: 0,
                           ),
