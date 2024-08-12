@@ -1,6 +1,12 @@
+import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:quran_app/core/Home/home.dart';
- void main() {
+import 'package:quran_app/core/local_notification.dart';
+ void main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+  await LocalNotification.init();
+  await AndroidAlarmManager.initialize();
+  
   runApp(const MyApp());
 }
 

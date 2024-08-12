@@ -9,6 +9,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:quran_app/constants.dart';
 import 'package:intl/intl.dart';
+import 'package:quran_app/core/local_notification.dart';
 
 class PrayerTime extends StatefulWidget {
 
@@ -58,9 +59,9 @@ class PrayerTime extends StatefulWidget {
      return await Geolocator.getCurrentPosition();
 }
  
-PrayerTimes? todayPrayerTimes;
+late PrayerTimes todayPrayerTimes;
 
- Future _getCurrentLocation() async {
+ Future<PrayerTimes> _getCurrentLocation() async {
 
     Position position = await _determinePosition();
 
@@ -74,12 +75,12 @@ PrayerTimes? todayPrayerTimes;
     setState(() {
       todayPrayerTimes = prayerTimes;
     });
-
-    
-    
+ 
     return prayerTimes;
     
   }
+
+  Future<PrayerTimes>? _futurePrayerTimes;
 
 PlayerState? _playerState;
 final player = AudioPlayer();
@@ -94,18 +95,23 @@ void handlePlayPause()  {
     player.pause();
 }
 
+void checkPrayerTimeNotification() {
+  // bool isAllowed = true; // your condition variable
+  DateTime targetTime = DateTime.now(); // your target time
+  // todayPrayerTimes?.timeForPrayer(todayPrayerTimes!.nextPrayer())
+
+    LocalNotification.showSimpleNotification(
+      title: 'It is Time for Prayer',
+      body: 'Do your prayer in the masjid',
+      payload: 'aaa'
+    );
+  
+}
+
  @override
   void initState()  {
-    // player.play('adhan/adhen-tounes-ali-barek.mp3');    
-   
-    //  if(DateTime.now().hour == 11 && DateTime.now().minute == 43)
-    //   {
-    //     playAudio();
-    //   }
-    // player.play(UrlSource('https://www.youtube.com/watch?v=y1emfKzsUqA'));
-    
-    
-    // player.setSourceUrl('adhan/adhen-tounes-ali-barek.mp3');
+    _futurePrayerTimes = _getCurrentLocation();
+    checkPrayerTimeNotification();
   }
   // DateTime? fajreTime = todayPrayerTime?.fajr.toLocal();
 
@@ -113,7 +119,7 @@ void handlePlayPause()  {
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
     return FutureBuilder(
-      future: _getCurrentLocation(),
+      future: _futurePrayerTimes,
       builder: (BuildContext context, AsyncSnapshot snapshot){
         return Container(
           // width: screenSize.width,
@@ -145,12 +151,6 @@ void handlePlayPause()  {
                     ),
                     ),
                   ),
-                // IconButton(
-                //     icon: Icon(Icons.build),
-                //    onPressed: () {
-                //      final player = AudioPlayer();
-                //      player.play(AssetSource('adhan/adhen-tounes-ali-barek.mp3'));
-                //    },
                    
                  
                    
